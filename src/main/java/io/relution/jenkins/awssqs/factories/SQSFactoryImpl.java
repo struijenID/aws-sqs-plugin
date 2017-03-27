@@ -99,7 +99,12 @@ public class SQSFactoryImpl implements io.relution.jenkins.awssqs.interfaces.SQS
     private ClientConfiguration getClientConfiguration(final io.relution.jenkins.awssqs.interfaces.SQSQueue queue) {
         final ClientConfiguration config = new ClientConfiguration();
 
-        ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
+        // Check to see if Jenkins is up yet
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            return config;
+        }
+        ProxyConfiguration proxyConfig = jenkins.proxy;
         Proxy proxy = proxyConfig == null ? Proxy.NO_PROXY : proxyConfig.createProxy(queue.getEndpoint());
         if (!proxy.equals(Proxy.NO_PROXY) && proxy.address() instanceof InetSocketAddress) {
             InetSocketAddress address = (InetSocketAddress) proxy.address();
