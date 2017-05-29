@@ -23,10 +23,11 @@ import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
+import hudson.model.CauseAction;
 import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.ParametersAction;
 import hudson.model.StringParameterValue;
 import hudson.triggers.Trigger;
@@ -42,6 +43,7 @@ import io.relution.jenkins.awssqs.interfaces.SQSQueueMonitorScheduler;
 import io.relution.jenkins.awssqs.logging.Log;
 import io.relution.jenkins.awssqs.model.events.ConfigurationChangedEvent;
 import io.relution.jenkins.awssqs.model.events.EventBroker;
+import jenkins.model.ParameterizedJobMixIn;
 import net.sf.json.JSONObject;
 import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.lang3.StringUtils;
@@ -61,8 +63,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static io.relution.jenkins.awssqs.util.JobInfoHelpers.asParameterizedJobMixIn;
 
-public class SQSTrigger extends Trigger<AbstractProject<?, ?>> implements io.relution.jenkins.awssqs.interfaces.SQSQueueListener, Runnable {
+public class SQSTrigger extends Trigger<Job<?, ?>> implements io.relution.jenkins.awssqs.interfaces.SQSQueueListener, Runnable {
 
     private final String queueUuid;
 
@@ -87,7 +90,7 @@ public class SQSTrigger extends Trigger<AbstractProject<?, ?>> implements io.rel
     }
 
     @Override
-    public void start(final AbstractProject<?, ?> project, final boolean newInstance) {
+    public void start(final Job<?, ?> project, final boolean newInstance) {
         super.start(project, newInstance);
 
         final DescriptorImpl descriptor = (DescriptorImpl) this.getDescriptor();
@@ -240,7 +243,9 @@ public class SQSTrigger extends Trigger<AbstractProject<?, ?>> implements io.rel
         if (job == null) {
             Log.severe("Unexpected error, 'job' object was null!");
         } else {
-            job.scheduleBuild(0, cause, new ParametersAction(parameters));
+            ParameterizedJobMixIn paramJob = asParameterizedJobMixIn(job);
+            paramJob.scheduleBuild2(0, new CauseAction(cause), new ParametersAction(parameters));
+            Log.info("AWS SQS Message for " + job.getFullName() + ". Triggering #" + job.getNextBuildNumber());
         }
         Log.info("Triggering job [COMPLETED]");
     }
@@ -252,7 +257,7 @@ public class SQSTrigger extends Trigger<AbstractProject<?, ?>> implements io.rel
 
     public final class SQSTriggerPollingAction implements Action {
 
-        public AbstractProject<?, ?> getOwner() {
+        public Job<?, ?> getOwner() {
             return SQSTrigger.this.job;
         }
 
@@ -315,7 +320,7 @@ public class SQSTrigger extends Trigger<AbstractProject<?, ?>> implements io.rel
 
         @Override
         public boolean isApplicable(final Item item) {
-            return item instanceof AbstractProject;
+            return item instanceof Job;
         }
 
         @Override

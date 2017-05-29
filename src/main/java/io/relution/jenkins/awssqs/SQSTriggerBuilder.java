@@ -23,19 +23,21 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import hudson.Util;
-import hudson.model.AbstractProject;
 import hudson.model.Cause;
+import hudson.model.Job;
 import hudson.util.StreamTaskListener;
+import jenkins.triggers.SCMTriggerItem;
 
+import static io.relution.jenkins.awssqs.util.JobInfoHelpers.asParameterizedJobMixIn;
 
 public class SQSTriggerBuilder implements Runnable {
 
     private final SQSTrigger            trigger;
-    private final AbstractProject<?, ?> job;
+    private final Job<?, ?> job;
 
     private final DateFormat            formatter = DateFormat.getDateTimeInstance();
 
-    public SQSTriggerBuilder(final SQSTrigger trigger, final AbstractProject<?, ?> job) {
+    public SQSTriggerBuilder(final SQSTrigger trigger, final Job<?, ?> job) {
         this.trigger = trigger;
         this.job = job;
     }
@@ -58,7 +60,11 @@ public class SQSTriggerBuilder implements Runnable {
         final long now = System.currentTimeMillis();
 
         logger.format("Started on %s", this.toDateTime(now));
-        final boolean hasChanges = this.job.poll(listener).hasChanges();
+        SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
+        boolean hasChanges = false;
+        if (scmTriggerItem != null) {
+            hasChanges = scmTriggerItem.poll(listener).hasChanges();
+        }
         logger.println("Done. Took " + this.toTimeSpan(now));
 
         if (!hasChanges) {
@@ -73,7 +79,7 @@ public class SQSTriggerBuilder implements Runnable {
         final String note = "SQS poll initiated on " + this.toDateTime(now);
         final Cause cause = new Cause.RemoteCause("SQS trigger", note);
 
-        if (this.job.scheduleBuild(cause)) {
+        if (asParameterizedJobMixIn(job).scheduleBuild(cause)) {
             logger.println("Job queued");
         } else {
             logger.println("Job NOT queued - it was determined that this job has been queued already.");
