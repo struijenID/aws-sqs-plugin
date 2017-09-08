@@ -27,8 +27,9 @@ To use this plugin you will need to have the following:
     9. [Configure Jenkins jobs](#configure-jobs-to-use-the-queue-on-jenkins)
     10. [Test your setup](#test-your-setup)
 2. [Development](#development)
+2. [Release](#release)
 3. [License](#license)
-4. [Maintainer](#maintainers)
+4. [Maintainers](#maintainers)
 
 ## Using the plugin
 
