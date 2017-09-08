@@ -1,5 +1,8 @@
 #AWS SQS Plugin for Jenkins
-A Jenkins plugin that allows to uses Events sent to Amazon Simple Queue Service (SQS) as a build trigger.
+
+A Jenkins plugin that allows using Events sent to Amazon Simple Queue Service (SQS) as a build trigger.
+
+Allows default IAM access (no access/security keys required).
 
 To use this plugin you will need to have the following:
 
