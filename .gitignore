@@ -11,6 +11,7 @@ release.properties
 local.properties
 dependency-reduced-pom.xml
 buildNumber.properties
+settings-release.xml
 .DS_Store
 .mvn/timing.properties
 .settings/

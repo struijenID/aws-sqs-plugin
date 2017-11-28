@@ -207,8 +207,19 @@ If you've set up everything correctly pushing a change to the Git repository on 
 
 # Release
 
+## One time settings setup:
+
+1. login into artifactory at: https://repo.jenkins-ci.org
+1. browse to repository "releases", and generate settings file using your own credentials
+1. save the file under repo root folder as `settings-release.xml`
+
+## Each release:
+
 ```Shell
-mvn release:prepare release:perform
+mvn \
+    -s settings-release.xml \
+    release:prepare \
+    release:perform
 ```
 
 # License
