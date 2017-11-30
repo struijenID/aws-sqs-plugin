@@ -80,13 +80,6 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <distributionManagement>
-        <repository>
-            <id>maven.jenkins-ci.org</id>
-            <name>public</name>
-            <url>https://repo.jenkins-ci.org/public</url>
-        </repository>
-    </distributionManagement>
     <dependencies>
 
         <dependency>
