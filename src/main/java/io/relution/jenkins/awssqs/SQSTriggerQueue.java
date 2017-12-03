@@ -307,10 +307,6 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
 
 			final Jenkins Jinstance = Jenkins.getInstance();
 
-			if (Jinstance == null) {
-				return new ListBoxModel();
-			}
-
 			if (!Jinstance.hasPermission(Jenkins.ADMINISTER)) {
 				return new ListBoxModel();
 			}
@@ -356,30 +352,32 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
         }
 
         public FormValidation doCheckUuid(@QueryParameter final String value) {
-            if (StringUtils.isBlank(value)) {
-                return FormValidation.ok();
-            }
+            if (!StringUtils.isBlank(value)) {
 
-            final Jenkins Jinstance = Jenkins.getInstance();
-            if (Jinstance == null) {
-                return FormValidation.ok();
-            }
+                final Jenkins Jinstance = Jenkins.getInstance();
 
-            final SQSTrigger.DescriptorImpl Cdescriptor = (SQSTrigger.DescriptorImpl) Jinstance.getDescriptor(SQSTrigger.class);
-            if (Cdescriptor == null) {
-                return FormValidation.ok();
-            }
+                final SQSTrigger.DescriptorImpl Cdescriptor = (SQSTrigger.DescriptorImpl) Jinstance.getDescriptor(SQSTrigger.class);
+                if (Cdescriptor == null) {
+                    return FormValidation.ok();
+                }
 
-            final List<SQSTriggerQueue> qlist = Cdescriptor.getSqsQueues();
-            if (qlist == null) {
-                return FormValidation.ok();
-            }
+                final List<SQSTriggerQueue> qlist = Cdescriptor.getSqsQueues();
+                if (qlist == null) {
+                    return FormValidation.ok();
+                }
 
-            for (SQSTriggerQueue entry : qlist) {
-                if(entry.getUuid().equals(value)) {
+                int i = 0;
+                for (SQSTriggerQueue entry : qlist) {
+                    if(entry.getUuid().equals(value)) {
+                        i++;
+                    }
+                }
+                if (i > 1) {
                     return FormValidation.error(Messages.errorUuid());
                 }
+
             }
+
             return FormValidation.ok();
         }
 
