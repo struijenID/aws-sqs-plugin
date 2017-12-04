@@ -28,12 +28,27 @@
         </developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <properties>
         <jenkins.version>2.63</jenkins.version>
         <java.level>8</java.level>
         <jenkins-test-harness.version>2.2</jenkins-test-harness.version>
+        <!-- Dependencies artifact version -->
+        <aws-java-sdk-sqs.version>1.11.233</aws-java-sdk-sqs.version>
+        <guice.version>4.0</guice.version>
+        <gson.version>2.8.2</gson.version>
+        <git.version>3.6.4</git.version>
+        <multiple-scms.version>0.6</multiple-scms.version>
+        <commons-lang3.version>3.7</commons-lang3.version>
+        <plain-credentials.version>1.4</plain-credentials.version>
+        <htmlunit.version>2.20</htmlunit.version>
+        <mockito-core.version>2.12.0</mockito-core.version>
+        <assertj-core.version>3.8.0</assertj-core.version>
+        <junit.version>1.6</junit.version>
+        <!-- Build plugins artifact version -->
+        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+        <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
     </properties>
 
     <licenses>
@@ -85,72 +100,72 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sqs</artifactId>
-            <version>1.11.233</version>
+            <version>${aws-java-sdk-sqs.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>4.0</version>
+            <version>${guice.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.2</version>
+            <version>${gson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
             <optional>true</optional>
-            <version>3.6.4</version>
+            <version>${git.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>multiple-scms</artifactId>
             <optional>true</optional>
-            <version>0.6</version>
+            <version>${multiple-scms.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.7</version>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>plain-credentials</artifactId>
+            <version>${plain-credentials.version}</version>
         </dependency>
 
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
             <artifactId>htmlunit</artifactId>
-            <version>2.20</version>
+            <version>${htmlunit.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.12.0</version>
+            <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.8.0</version>
+            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
-
-		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
-			<artifactId>plain-credentials</artifactId>
-			<version>1.4</version>
-		</dependency>
 
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>junit</artifactId>
-            <version>1.6</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -158,18 +173,20 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <skipTests>false</skipTests>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.16</version>
+                <version>${animal-sniffer-maven-plugin.version}</version>
                 <configuration>
                     <signature>
                         <groupId>org.codehaus.mojo.signature</groupId>
@@ -178,6 +195,7 @@
                     </signature>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
