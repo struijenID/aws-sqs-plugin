@@ -94,31 +94,31 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
         this.nameOrUrl = nameOrUrl;
         this.credentialsId = credentialsId;
 
-		if ((credentialsId == null) || credentialsId.isEmpty())	{
-			this.accessKey = "";
-			this.secretKey = null;
+        if ((credentialsId == null) || credentialsId.isEmpty()) {
+            this.accessKey = "";
+            this.secretKey = null;
 
-		} else {
-			StringCredentials scresult = CredentialsMatchers.firstOrNull(
+        } else {
+            StringCredentials scresult = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(
-					StringCredentials.class,
-					Jenkins.getInstance(),
-					ACL.SYSTEM,
-					Collections.<DomainRequirement> emptyList()
-				),
+                    StringCredentials.class,
+                    Jenkins.getInstance(),
+                    ACL.SYSTEM,
+                    Collections.<DomainRequirement> emptyList()
+                ),
                 CredentialsMatchers.withId(credentialsId)
-			);
+            );
 
-			if (scresult == null) {
-				this.accessKey = "";
-				this.secretKey = null;
-				io.relution.jenkins.awssqs.logging.Log.info("SQSTriggerQueue: No credentials found for id{%s}", credentialsId);
+            if (scresult == null) {
+                this.accessKey = "";
+                this.secretKey = null;
+                io.relution.jenkins.awssqs.logging.Log.info("SQSTriggerQueue: No credentials found for id{%s}", credentialsId);
 
-			} else {
-				this.accessKey = scresult.getId();
-				this.secretKey = scresult.getSecret();
-			}
-		}
+            } else {
+                this.accessKey = scresult.getId();
+                this.secretKey = scresult.getSecret();
+            }
+        }
 
         this.waitTimeSeconds = this.limit(
                 waitTimeSeconds,
@@ -148,6 +148,49 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
         io.relution.jenkins.awssqs.logging.Log.info("Create new SQSTriggerQueue(%s, %s, %s)", this.uuid, nameOrUrl, this.accessKey);
     }
 
+    // Deprecated for use by applications written before aws-sqs-plugin tag 2.0.
+    @Deprecated
+    public SQSTriggerQueue(
+            final String uuid,
+            final String nameOrUrl,
+            final String accessKey,
+            final Secret secretKey,
+            final Integer waitTimeSeconds,
+            final Integer maxNumberOfMessages) {
+        this.uuid = StringUtils.isBlank(uuid) ? UUID.randomUUID().toString() : uuid;
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
+        this.nameOrUrl = nameOrUrl;
+        this.credentialsId = null;
+
+        this.waitTimeSeconds = this.limit(
+                waitTimeSeconds,
+                WAIT_TIME_SECONDS_MIN,
+                WAIT_TIME_SECONDS_MAX,
+                WAIT_TIME_SECONDS_DEFAULT);
+
+        this.maxNumberOfMessages = this.limit(
+                maxNumberOfMessages,
+                MAX_NUMBER_OF_MESSAGES_MIN,
+                MAX_NUMBER_OF_MESSAGES_MAX,
+                MAX_NUMBER_OF_MESSAGES_DEFAULT);
+
+        final Matcher sqsUrlMatcher = SQS_URL_PATTERN.matcher(nameOrUrl);
+
+        if (sqsUrlMatcher.matches()) {
+            this.url = nameOrUrl;
+            this.name = sqsUrlMatcher.group("name");
+            this.endpoint = sqsUrlMatcher.group("endpoint");
+
+        } else {
+            this.name = nameOrUrl;
+            this.endpoint = null;
+
+        }
+
+        io.relution.jenkins.awssqs.logging.Log.info("Create new SQSTriggerQueue(%s, %s, %s)", this.uuid, nameOrUrl, accessKey);
+    }
+
     public AmazonSQS getSQSClient() {
         if (this.sqs == null) {
             this.sqs = this.getFactory().createSQS(this);
@@ -174,6 +217,18 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
 
     public String getNameOrUrl() {
         return this.nameOrUrl;
+    }
+
+    // Deprecated for use by applications written before aws-sqs-plugin tag 2.0.
+    @Deprecated
+    public String getAccessKey() {
+        return this.accessKey;
+    }
+
+    // Deprecated for use by applications written before aws-sqs-plugin tag 2.0.
+    @Deprecated
+    public Secret getSecretKey() {
+        return this.secretKey;
     }
 
     public String getCredentialsId() {
@@ -303,28 +358,28 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
             return Messages.displayName(); // unused
         }
 
-		public ListBoxModel doFillCredentialsIdItems() {
+        public ListBoxModel doFillCredentialsIdItems() {
 
-			final Jenkins Jinstance = Jenkins.getInstance();
+            final Jenkins Jinstance = Jenkins.getInstance();
 
-			if (!Jinstance.hasPermission(Jenkins.ADMINISTER)) {
-				return new ListBoxModel();
-			}
+            if (!Jinstance.hasPermission(Jenkins.ADMINISTER)) {
+                return new ListBoxModel();
+            }
 
-			final AbstractIdCredentialsListBoxModel items = new StandardListBoxModel().withEmptySelection();
+            final AbstractIdCredentialsListBoxModel items = new StandardListBoxModel().withEmptySelection();
 
-			items.withMatching(
-				CredentialsMatchers.instanceOf(StringCredentials.class),
-				CredentialsProvider.lookupCredentials(
-					StringCredentials.class,
-					Jinstance,
-					ACL.SYSTEM,
-					Collections.<DomainRequirement> emptyList()
-				)
-			);
+            items.withMatching(
+                CredentialsMatchers.instanceOf(StringCredentials.class),
+                CredentialsProvider.lookupCredentials(
+                    StringCredentials.class,
+                    Jinstance,
+                    ACL.SYSTEM,
+                    Collections.<DomainRequirement> emptyList()
+                )
+            );
 
-			return items;
-		}
+            return items;
+        }
 
         public FormValidation doCheckNameOrUrl(@QueryParameter final String value) {
             if (StringUtils.isBlank(value)) {
@@ -352,30 +407,30 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
         }
 
         public FormValidation doCheckUuid(@QueryParameter final String value) {
-            if (!StringUtils.isBlank(value)) {
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.ok();
+            }
 
-                final Jenkins Jinstance = Jenkins.getInstance();
+            final Jenkins Jinstance = Jenkins.getInstance();
 
-                final SQSTrigger.DescriptorImpl Cdescriptor = (SQSTrigger.DescriptorImpl) Jinstance.getDescriptor(SQSTrigger.class);
-                if (Cdescriptor == null) {
-                    return FormValidation.ok();
+            final SQSTrigger.DescriptorImpl Cdescriptor = (SQSTrigger.DescriptorImpl) Jinstance.getDescriptor(SQSTrigger.class);
+            if (Cdescriptor == null) {
+                return FormValidation.ok();
+            }
+
+            final List<SQSTriggerQueue> qlist = Cdescriptor.getSqsQueues();
+            if (qlist == null) {
+                return FormValidation.ok();
+            }
+
+            int i = 0;
+            for (SQSTriggerQueue entry : qlist) {
+                if(entry.getUuid().equals(value)) {
+                    i++;
                 }
-
-                final List<SQSTriggerQueue> qlist = Cdescriptor.getSqsQueues();
-                if (qlist == null) {
-                    return FormValidation.ok();
-                }
-
-                int i = 0;
-                for (SQSTriggerQueue entry : qlist) {
-                    if(entry.getUuid().equals(value)) {
-                        i++;
-                    }
-                }
-                if (i > 1) {
-                    return FormValidation.error(Messages.errorUuid());
-                }
-
+            }
+            if (i > 1) {
+                return FormValidation.error(Messages.errorUuid());
             }
 
             return FormValidation.ok();
@@ -430,12 +485,12 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
                 }
 
                 final String url = result.getQueueUrl();
-				if ((credentialsId == null) || credentialsId.isEmpty())	{
-					return FormValidation.error("No credentials set");
-				} else {
-					return FormValidation.ok("Access to %s successful\n(%s),\ncredentials store ID=(%s)",
-						queue.getName(), url, queue.getCredentialsId());
-				}
+                if ((credentialsId == null) || credentialsId.isEmpty())    {
+                    return FormValidation.error("No credentials set");
+                } else {
+                    return FormValidation.ok("Access to %s successful\n(%s),\ncredentials store ID=(%s)",
+                        queue.getName(), url, queue.getCredentialsId());
+                }
 
             } catch (final AmazonServiceException ase) {
                 return FormValidation.error(ase, ase.getMessage());
