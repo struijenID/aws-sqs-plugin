@@ -25,18 +25,27 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
+import hudson.util.ListBoxModel;
+import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import io.relution.jenkins.awssqs.i18n.sqstriggerqueue.Messages;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.AbstractIdCredentialsListBoxModel;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+
 import java.io.IOException;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.List;
-
+import java.util.Collections;
 
 public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> implements io.relution.jenkins.awssqs.interfaces.SQSQueue {
 
@@ -57,6 +66,7 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
     private final String uuid;
 
     private final String nameOrUrl;
+    private final String credentialsId;
     private final String accessKey;
     private final Secret secretKey;
 
@@ -76,6 +86,73 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
     public SQSTriggerQueue(
             final String uuid,
             final String nameOrUrl,
+            final String credentialsId,
+            final Integer waitTimeSeconds,
+            final Integer maxNumberOfMessages) {
+
+        this.uuid = StringUtils.isBlank(uuid) ? UUID.randomUUID().toString() : uuid;
+        this.nameOrUrl = nameOrUrl;
+        this.credentialsId = credentialsId;
+
+        if ((credentialsId == null) || credentialsId.isEmpty()) {
+            this.accessKey = "";
+            this.secretKey = null;
+
+        } else {
+            StringCredentials scresult = CredentialsMatchers.firstOrNull(
+                CredentialsProvider.lookupCredentials(
+                    StringCredentials.class,
+                    Jenkins.getInstance(),
+                    ACL.SYSTEM,
+                    Collections.<DomainRequirement> emptyList()
+                ),
+                CredentialsMatchers.withId(credentialsId)
+            );
+
+            if (scresult == null) {
+                this.accessKey = "";
+                this.secretKey = null;
+                io.relution.jenkins.awssqs.logging.Log.info("SQSTriggerQueue: No credentials found for id{%s}", credentialsId);
+
+            } else {
+                this.accessKey = scresult.getId();
+                this.secretKey = scresult.getSecret();
+            }
+        }
+
+        this.waitTimeSeconds = this.limit(
+                waitTimeSeconds,
+                WAIT_TIME_SECONDS_MIN,
+                WAIT_TIME_SECONDS_MAX,
+                WAIT_TIME_SECONDS_DEFAULT);
+
+        this.maxNumberOfMessages = this.limit(
+                maxNumberOfMessages,
+                MAX_NUMBER_OF_MESSAGES_MIN,
+                MAX_NUMBER_OF_MESSAGES_MAX,
+                MAX_NUMBER_OF_MESSAGES_DEFAULT);
+
+        final Matcher sqsUrlMatcher = SQS_URL_PATTERN.matcher(nameOrUrl);
+
+        if (sqsUrlMatcher.matches()) {
+            this.url = nameOrUrl;
+            this.name = sqsUrlMatcher.group("name");
+            this.endpoint = sqsUrlMatcher.group("endpoint");
+
+        } else {
+            this.name = nameOrUrl;
+            this.endpoint = null;
+
+        }
+
+        io.relution.jenkins.awssqs.logging.Log.info("Create new SQSTriggerQueue(%s, %s, %s)", this.uuid, nameOrUrl, this.accessKey);
+    }
+
+    // Deprecated for use by applications written before aws-sqs-plugin tag 2.0.
+    @Deprecated
+    public SQSTriggerQueue(
+            final String uuid,
+            final String nameOrUrl,
             final String accessKey,
             final Secret secretKey,
             final Integer waitTimeSeconds,
@@ -84,6 +161,7 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.nameOrUrl = nameOrUrl;
+        this.credentialsId = null;
 
         this.waitTimeSeconds = this.limit(
                 waitTimeSeconds,
@@ -141,12 +219,20 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
         return this.nameOrUrl;
     }
 
+    // Deprecated for use by applications written before aws-sqs-plugin tag 2.0.
+    @Deprecated
     public String getAccessKey() {
         return this.accessKey;
     }
 
+    // Deprecated for use by applications written before aws-sqs-plugin tag 2.0.
+    @Deprecated
     public Secret getSecretKey() {
         return this.secretKey;
+    }
+
+    public String getCredentialsId() {
+        return this.credentialsId;
     }
 
     @Override
@@ -272,6 +358,29 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
             return Messages.displayName(); // unused
         }
 
+        public ListBoxModel doFillCredentialsIdItems() {
+
+            final Jenkins Jinstance = Jenkins.getInstance();
+
+            if (!Jinstance.hasPermission(Jenkins.ADMINISTER)) {
+                return new ListBoxModel();
+            }
+
+            final AbstractIdCredentialsListBoxModel items = new StandardListBoxModel().withEmptySelection();
+
+            items.withMatching(
+                CredentialsMatchers.instanceOf(StringCredentials.class),
+                CredentialsProvider.lookupCredentials(
+                    StringCredentials.class,
+                    Jinstance,
+                    ACL.SYSTEM,
+                    Collections.<DomainRequirement> emptyList()
+                )
+            );
+
+            return items;
+        }
+
         public FormValidation doCheckNameOrUrl(@QueryParameter final String value) {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.warning(Messages.warningUrl());
@@ -303,9 +412,6 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
             }
 
             final Jenkins Jinstance = Jenkins.getInstance();
-            if (Jinstance == null) {
-                return FormValidation.ok();
-            }
 
             final SQSTrigger.DescriptorImpl Cdescriptor = (SQSTrigger.DescriptorImpl) Jinstance.getDescriptor(SQSTrigger.class);
             if (Cdescriptor == null) {
@@ -317,11 +423,16 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
                 return FormValidation.ok();
             }
 
+            int i = 0;
             for (SQSTriggerQueue entry : qlist) {
                 if(entry.getUuid().equals(value)) {
-                    return FormValidation.error(Messages.errorUuid());
+                    i++;
                 }
             }
+            if (i > 1) {
+                return FormValidation.error(Messages.errorUuid());
+            }
+
             return FormValidation.ok();
         }
 
@@ -344,10 +455,9 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
         public FormValidation doValidate(
                 @QueryParameter final String uuid,
                 @QueryParameter final String nameOrUrl,
-                @QueryParameter final String accessKey,
-                @QueryParameter final Secret secretKey) throws IOException {
+                @QueryParameter final String credentialsId) throws IOException {
             try {
-                final SQSTriggerQueue queue = new SQSTriggerQueue(uuid, nameOrUrl, accessKey, secretKey, 0, 0);
+                final SQSTriggerQueue queue = new SQSTriggerQueue(uuid, nameOrUrl, credentialsId, 0, 0);
 
                 if (StringUtils.isBlank(queue.getName())) {
                     return FormValidation.warning("Name or URL of the queue must be set.");
@@ -375,7 +485,12 @@ public class SQSTriggerQueue extends AbstractDescribableImpl<SQSTriggerQueue> im
                 }
 
                 final String url = result.getQueueUrl();
-                return FormValidation.ok("Access to %s successful\n(%s)", queue.getName(), url);
+                if ((credentialsId == null) || credentialsId.isEmpty())    {
+                    return FormValidation.error("No credentials set");
+                } else {
+                    return FormValidation.ok("Access to %s successful\n(%s),\ncredentials store ID=(%s)",
+                        queue.getName(), url, queue.getCredentialsId());
+                }
 
             } catch (final AmazonServiceException ase) {
                 return FormValidation.error(ase, ase.getMessage());

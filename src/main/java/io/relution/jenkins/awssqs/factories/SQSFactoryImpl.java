@@ -101,9 +101,6 @@ public class SQSFactoryImpl implements io.relution.jenkins.awssqs.interfaces.SQS
 
         // Check to see if Jenkins is up yet
         Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins == null) {
-            return config;
-        }
         ProxyConfiguration proxyConfig = jenkins.proxy;
         Proxy proxy = proxyConfig == null ? Proxy.NO_PROXY : proxyConfig.createProxy(queue.getEndpoint());
         if (!proxy.equals(Proxy.NO_PROXY) && proxy.address() instanceof InetSocketAddress) {
