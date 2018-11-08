@@ -69,6 +69,8 @@ public class SQSTrigger extends Trigger<Job<?, ?>> implements io.relution.jenkin
 
     private final String queueUuid;
 
+    private final boolean disableCodeCommit;
+
     private transient SQSQueueMonitorScheduler scheduler;
 
     private transient MessageParserFactory messageParserFactory;
@@ -77,8 +79,9 @@ public class SQSTrigger extends Trigger<Job<?, ?>> implements io.relution.jenkin
     private transient ExecutorService executor;
 
     @DataBoundConstructor
-    public SQSTrigger(final String queueUuid) {
+    public SQSTrigger(final String queueUuid, final boolean disableCodeCommit) {
         this.queueUuid = queueUuid;
+        this.disableCodeCommit = disableCodeCommit;
     }
 
     public File getLogFile() {
@@ -140,6 +143,11 @@ public class SQSTrigger extends Trigger<Job<?, ?>> implements io.relution.jenkin
     @Override
     public String getQueueUuid() {
         return this.queueUuid;
+    }
+
+    @Override
+    public boolean isDisableCodeCommit() {
+        return this.disableCodeCommit;
     }
 
     @Inject
