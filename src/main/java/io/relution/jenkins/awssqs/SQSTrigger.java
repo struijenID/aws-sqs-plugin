@@ -78,7 +78,6 @@ public class SQSTrigger extends Trigger<Job<?, ?>> implements io.relution.jenkin
 
     private transient ExecutorService executor;
 
-    @DataBoundConstructor
     public SQSTrigger(final String queueUuid) {
         this.queueUuid = queueUuid;
         this.disableCodeCommit = false;
