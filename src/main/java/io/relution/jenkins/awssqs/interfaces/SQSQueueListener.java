@@ -38,7 +38,9 @@ public interface SQSQueueListener {
      * The disable flag of Amazon CodeCommit Check for listner
      * @return The disable flag of Amazon CodeCommit Check for listner
      */
-    boolean isDisableCodeCommit();
+    default boolean isDisableCodeCommit() {
+        return false;
+    }
     /**
      * The method to be invoked when new messages arrive in the SQS queue this listener is
      * associated with.
