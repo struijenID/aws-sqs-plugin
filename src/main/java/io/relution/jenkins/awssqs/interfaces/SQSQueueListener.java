@@ -35,6 +35,13 @@ public interface SQSQueueListener {
     String getQueueUuid();
 
     /**
+     * The disable flag of Amazon CodeCommit Check for listner
+     * @return The disable flag of Amazon CodeCommit Check for listner
+     */
+    default boolean isDisableCodeCommit() {
+        return false;
+    }
+    /**
      * The method to be invoked when new messages arrive in the SQS queue this listener is
      * associated with.
      * @param messages The collection of {@link Message} instances that were posted to the queue.

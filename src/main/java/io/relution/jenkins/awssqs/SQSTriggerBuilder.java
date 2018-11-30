@@ -60,18 +60,23 @@ public class SQSTriggerBuilder implements Runnable {
         final long now = System.currentTimeMillis();
 
         logger.format("Started on %s", this.toDateTime(now));
-        SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
-        boolean hasChanges = false;
-        if (scmTriggerItem != null) {
-            hasChanges = scmTriggerItem.poll(listener).hasChanges();
-        }
-        logger.println("Done. Took " + this.toTimeSpan(now));
-
-        if (!hasChanges) {
-            logger.println("No changes");
+        if (this.trigger.isDisableCodeCommit()) {
+            logger.println("Changes found without CodeCommit");
+            this.build(logger, now);   
         } else {
-            logger.println("Changes found");
-            this.build(logger, now);
+            SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
+            boolean hasChanges = false;
+            if (scmTriggerItem != null) {
+                hasChanges = scmTriggerItem.poll(listener).hasChanges();
+            }
+            logger.println("Done. Took " + this.toTimeSpan(now));
+
+            if (!hasChanges) {
+                logger.println("No changes");
+            } else {
+                logger.println("Changes found");
+                this.build(logger, now);
+            }
         }
     }
 
