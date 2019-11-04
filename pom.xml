@@ -1,245 +1,255 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>2.5</version>
-        <relativePath />
-    </parent>
+	<parent>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<version>3.51</version>
+		<relativePath />
+	</parent>
 
-    <groupId>io.relution.jenkins</groupId>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/AWS+SQS+Plugin</url>
-    <artifactId>aws-sqs</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
-    <packaging>hpi</packaging>
+	<groupId>io.relution.jenkins</groupId>
+	<url>https://wiki.jenkins-ci.org/display/JENKINS/AWS+SQS+Plugin</url>
+	<artifactId>aws-sqs</artifactId>
+	<version>2.0.2-SNAPSHOT</version>
+	<packaging>hpi</packaging>
 
-    <name>AWS SQS Build Trigger Plugin</name>
-    <description>
+	<name>AWS SQS Build Trigger Plugin</name>
+	<description>
         This plugin triggers builds based on events received via Amazon Web
         Services Simple Queue Service (AWS SQS) on a specified Queue.
     </description>
 
-    <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/${project.artifactId}-plugin.git
+	<scm>
+		<connection>scm:git:ssh://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/${project.artifactId}-plugin.git
         </developerConnection>
-        <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-      <tag>HEAD</tag>
-    </scm>
+		<url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
+		<tag>HEAD</tag>
+	</scm>
 
-    <properties>
-        <jenkins.version>2.63</jenkins.version>
-        <java.level>8</java.level>
-        <jenkins-test-harness.version>2.2</jenkins-test-harness.version>
-        <!-- Dependencies artifact version -->
-        <aws-java-sdk-sqs.version>1.11.233</aws-java-sdk-sqs.version>
-        <guice.version>4.0</guice.version>
-        <gson.version>2.8.2</gson.version>
-        <git.version>3.6.4</git.version>
-        <multiple-scms.version>0.6</multiple-scms.version>
-        <commons-lang3.version>3.7</commons-lang3.version>
-        <plain-credentials.version>1.4</plain-credentials.version>
-        <htmlunit.version>2.20</htmlunit.version>
-        <mockito-core.version>2.12.0</mockito-core.version>
-        <assertj-core.version>3.8.0</assertj-core.version>
-        <junit.version>1.6</junit.version>
-        <!-- Build plugins artifact version -->
-        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
-        <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
-        <java18.version>1.0</java18.version>
-    </properties>
+	<properties>
+		<jenkins.version>2.150.3</jenkins.version>
+		<jenkins-test-harness.version>2.56</jenkins-test-harness.version>
+		<java.level>8</java.level>
+		<!-- Dependencies artifact version -->
+		<aws-java-sdk-sqs.version>1.11.665</aws-java-sdk-sqs.version>
+		<aws-java-sdk.version>1.11.665</aws-java-sdk.version>
+		<guice.version>4.2.2</guice.version>
+		<gson.version>2.8.2</gson.version>
+		<git.version>3.12.1</git.version>
+		<multiple-scms.version>0.6</multiple-scms.version>
+		<commons-lang3.version>3.9</commons-lang3.version>
+		<plain-credentials.version>1.5</plain-credentials.version>
+		<htmlunit.version>2.36.0</htmlunit.version>
+		<mockito-core.version>2.28.2</mockito-core.version>
+		<assertj-core.version>3.14.0</assertj-core.version>
+		<junit.version>1.21</junit.version>
+		<!-- Build plugins artifact version -->
+		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+		<animal-sniffer-maven-plugin.version>1.18</animal-sniffer-maven-plugin.version>
+		<java18.version>1.0</java18.version>
+	</properties>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        </license>
-    </licenses>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
 
-    <developers>
-        <developer>
-            <id>mwaylabs</id>
-            <name>M-Way Solutions GmbH</name>
-            <email>jenkins.ios.bot@mwaysolutions.com</email>
-        </developer>
-        <developer>
-            <id>nickg</id>
-            <name>Nick Grealy</name>
-            <email>nickgrealy@gmail.com</email>
-        </developer>
-        <developer>
-            <id>j_vvt</id>
-            <name>Victor Timohin</name>
-            <email>vvt@opsguru.io</email>
-        </developer>
-        <developer>
-            <id>mvk</id>
-            <name>Max Kovgan</name>
-            <email>max@opsguru.io</email>
-        </developer>
-    </developers>
+	<developers>
+		<developer>
+			<id>mwaylabs</id>
+			<name>M-Way Solutions GmbH</name>
+			<email>jenkins.ios.bot@mwaysolutions.com</email>
+		</developer>
+		<developer>
+			<id>nickg</id>
+			<name>Nick Grealy</name>
+			<email>nickgrealy@gmail.com</email>
+		</developer>
+		<developer>
+			<id>j_vvt</id>
+			<name>Victor Timohin</name>
+			<email>vvt@opsguru.io</email>
+		</developer>
+		<developer>
+			<id>mvk</id>
+			<name>Max Kovgan</name>
+			<email>max@opsguru.io</email>
+		</developer>
+	</developers>
 
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
+	<repositories>
+		<repository>
+			<id>repo.jenkins-ci.org</id>
+			<url>http://repo.jenkins-ci.org/public/</url>
+		</repository>
+	</repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>repo.jenkins-ci.org</id>
+			<url>http://repo.jenkins-ci.org/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
 
-    <dependencies>
+	<dependencies>
 
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sqs</artifactId>
-            <version>${aws-java-sdk-sqs.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-sqs</artifactId>
+			<version>${aws-java-sdk-sqs.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>${guice.version}</version>
-        </dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.amazonaws</groupId> -->
+<!-- 			<artifactId>aws-java-sdk</artifactId> -->
+<!-- 			<version>${aws-java-sdk.version}</version> -->
+<!-- 		</dependency> -->
 
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>${guice.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>git</artifactId>
-            <optional>true</optional>
-            <version>${git.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>multiple-scms</artifactId>
-            <optional>true</optional>
-            <version>${multiple-scms.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>git</artifactId>
+			<optional>true</optional>
+			<version>${git.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>multiple-scms</artifactId>
+			<optional>true</optional>
+			<version>${multiple-scms.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>plain-credentials</artifactId>
-            <version>${plain-credentials.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons-lang3.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>net.sourceforge.htmlunit</groupId>
-            <artifactId>htmlunit</artifactId>
-            <version>${htmlunit.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>plain-credentials</artifactId>
+			<version>${plain-credentials.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito-core.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<version>${htmlunit.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj-core.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito-core.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>${assertj-core.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-    </dependencies>
+		<dependency>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-    <build>
-        <plugins>
+	</dependencies>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <skipTests>false</skipTests>
-                </configuration>
-            </plugin>
+	<build>
+		<plugins>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>${animal-sniffer-maven-plugin.version}</version>
-                <configuration>
-                    <signature>
-                        <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>java18</artifactId>
-                        <version>${java18.version}</version>
-                    </signature>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<skipTests>false</skipTests>
+				</configuration>
+			</plugin>
 
-        </plugins>
-    </build>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<version>${animal-sniffer-maven-plugin.version}</version>
+				<configuration>
+					<signature>
+						<groupId>org.codehaus.mojo.signature</groupId>
+						<artifactId>java18</artifactId>
+						<version>${java18.version}</version>
+					</signature>
+				</configuration>
+			</plugin>
 
-    <profiles>
-        <profile>
-            <id>only-eclipse</id>
-            <activation>
-                <property>
-                    <name>m2e.version</name>
-                </property>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-                        <plugin>
-                            <groupId>org.eclipse.m2e</groupId>
-                            <artifactId>lifecycle-mapping</artifactId>
-                            <version>1.0.0</version>
-                            <configuration>
-                                <lifecycleMappingMetadata>
-                                    <pluginExecutions>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>org.apache.maven.plugins</groupId>
-                                                <artifactId>maven-javadoc-plugin</artifactId>
-                                                <versionRange>[2.10.1,)</versionRange>
-                                                <goals>
-                                                    <goal>javadoc</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <ignore />
-                                            </action>
-                                        </pluginExecution>
-                                    </pluginExecutions>
-                                </lifecycleMappingMetadata>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-    </profiles>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>only-eclipse</id>
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<!--This plugin's configuration is used to store Eclipse m2e settings 
+							only. It has no influence on the Maven build itself. -->
+						<plugin>
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-javadoc-plugin</artifactId>
+												<versionRange>[2.10.1,)</versionRange>
+												<goals>
+													<goal>javadoc</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<ignore />
+											</action>
+										</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
